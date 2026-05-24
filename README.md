@@ -319,4 +319,129 @@ The Jenkins dashboard was displayed, confirming that the installation and initia
 
 ---
 
+## Phase 3 — Jenkins Tools and Plugin Preparation
+
+### Step 32 — A Connection to the Server Was Established
+
+A new SSH session was opened to the EC2 instance to prepare the server with the tools required for a Java/Maven CI project:
+
+```bash
+ssh -i "ci-jenkins-key.pem" ubuntu@51.21.149.38
+```
+
+---
+
+### Step 33 — Installed Tool Versions Were Checked
+
+The versions of Git, Java, and Maven were checked on the server:
+
+```bash
+git --version
+java -version
+mvn -version
+```
+
+The following results were observed:
+
+| Tool | Result |
+|---|---|
+| Git | `git version 2.43.0` — already installed |
+| Java | OpenJDK `21.0.10` — already installed |
+| Maven | Not found — installation required |
+
+---
+
+### Step 34 — Maven Was Installed
+
+Because Maven was not present on the server, it was installed from the Ubuntu package repository:
+
+```bash
+sudo apt update
+sudo apt install maven -y
+```
+
+---
+
+### Step 35 — The Maven Installation Was Verified
+
+The Maven installation was confirmed with:
+
+```bash
+mvn -version
+```
+
+The output showed **Apache Maven 3.8.7** running on **Java 21.0.10**.
+
+---
+
+### Step 36 — Installed Jenkins Plugins Were Reviewed
+
+In the Jenkins web interface, the installed plugins were reviewed under **Manage Jenkins → Plugins → Installed plugins**.
+
+The following plugins were confirmed as already available from the initial suggested plugins setup:
+
+| Plugin | Status |
+|---|---|
+| Git | Already installed |
+| Pipeline | Already installed |
+| Workspace Cleanup | Already installed |
+| Timestamper | Already installed |
+
+The following required plugins were found to be missing:
+
+| Plugin | Status |
+|---|---|
+| Maven Integration | Not installed |
+| Pipeline Maven Integration | Not installed |
+| Build Timestamp | Not installed |
+
+SonarQube and Nexus plugins were intentionally not installed at this stage.
+
+---
+
+### Step 37 — The Missing Plugins Were Installed
+
+The missing plugins were installed from **Manage Jenkins → Plugins → Available plugins**. Each plugin was searched by name, selected, and installed:
+
+| Plugin | Action |
+|---|---|
+| Maven Integration | Installed |
+| Pipeline Maven Integration | Installed |
+| Build Timestamp | Installed |
+
+SonarQube and Nexus plugins were not installed at this stage.
+
+---
+
+### Step 38 — Jenkins Was Restarted
+
+Because new plugins were installed, Jenkins prompted for a restart. **Restart Jenkins when installation is complete and no jobs are running** was selected.
+
+---
+
+### Step 39 — The Final Tool and Plugin Setup Was Confirmed
+
+After the restart, the server and Jenkins were confirmed ready for a Java/Maven CI project.
+
+**Tools on the server:**
+
+| Tool | Version |
+|---|---|
+| Git | 2.43.0 |
+| Java | OpenJDK 21.0.10 |
+| Maven | 3.8.7 |
+
+**Required Jenkins plugins:**
+
+| Plugin | Status |
+|---|---|
+| Git | Installed |
+| Pipeline | Installed |
+| Maven Integration | Installed |
+| Pipeline Maven Integration | Installed |
+| Workspace Cleanup | Installed |
+| Build Timestamp | Installed |
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
