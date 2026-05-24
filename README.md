@@ -541,4 +541,23 @@ The DevOps build information was printed to the console.
 
 ---
 
+## Phase 5 — Jenkins CI Configuration
+
+### Step 46 — Maven Was Configured in Global Tool Configuration
+
+Because the server Maven (**3.8.7**) is older than the project requires (**3.9.9+**), a newer Maven was added under **Manage Jenkins → Global Tool Configuration → Maven installations**:
+
+| Setting | Value |
+|---|---|
+| Name | `Maven-3.9` |
+| Install automatically | Enabled |
+| Installer | Install from Apache |
+| Version | `3.9.10` |
+
+**Save** was clicked.
+
+![Jenkins Maven global tool configuration](screenshots/46-jenkins-maven-global-tool-config.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
