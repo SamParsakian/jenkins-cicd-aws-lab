@@ -633,4 +633,35 @@ The updated repository was pushed to GitHub so Jenkins could use the root **`Jen
 
 ---
 
+### Step 52 — A Pipeline Job Was Created
+
+A **Pipeline** job named **`pipeline-maven-sample-app`** was created to load the root **`Jenkinsfile`** from:
+
+```
+https://github.com/SamParsakian/jenkins-ci-sample-app.git
+```
+
+**Build #1** failed because Jenkins used the server Maven (**3.8.7**) instead of the project requirement (**3.9.9+**).
+
+---
+
+### Step 53 — Pipeline Tools Were Configured and Build #2 Succeeded
+
+A **`tools`** block was added to the **`Jenkinsfile`**:
+
+| Tool | Name |
+|---|---|
+| Maven | `Maven-3.9` |
+| JDK | `JDK-21` |
+
+The change was pushed to GitHub.
+
+![Jenkinsfile with Maven and JDK tools on GitHub](screenshots/52-jenkinsfile-pipeline-tools-github.png)
+
+The pipeline job was run again. **Build #2** finished with **SUCCESS**, and **`jenkins-ci-sample-app-1.0-SNAPSHOT.jar`** was archived.
+
+![Pipeline Build #2 success](screenshots/53-pipeline-build-2-success.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
