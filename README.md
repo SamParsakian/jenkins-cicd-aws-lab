@@ -560,4 +560,39 @@ Because the server Maven (**3.8.7**) is older than the project requires (**3.9.9
 
 ---
 
+### Step 47 — A Freestyle Job Was Created and Configured
+
+A **Freestyle project** named **`build-maven-sample-app`** was created. **Git** was set to:
+
+```
+https://github.com/SamParsakian/jenkins-ci-sample-app.git
+```
+
+A **Invoke top-level Maven targets** build step was added:
+
+| Setting | Value |
+|---|---|
+| Maven Version | `Maven-3.9` |
+| Goals | `clean package` |
+
+---
+
+### Step 48 — The First Build Failed and Build #2 Succeeded
+
+**Build #1** failed because the server had the Java 21 **runtime** but not the **compiler** required by Maven.
+
+**OpenJDK 21 JDK** was installed on the server:
+
+```bash
+sudo apt install openjdk-21-jdk -y
+```
+
+**JDK-21** was added under **Global Tool Configuration**, assigned to the job, and the build was run again.
+
+**Build #2** finished with **SUCCESS**.
+
+![Jenkins freestyle build success](screenshots/48-jenkins-freestyle-build-success.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
