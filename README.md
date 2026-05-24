@@ -595,4 +595,18 @@ sudo apt install openjdk-21-jdk -y
 
 ---
 
+### Step 49 — Build Artifacts Were Archived
+
+The **`build-maven-sample-app`** job was updated. Under **Post-build Actions**, **Archive the artifacts** was added with:
+
+```
+target/*.jar
+```
+
+The job was run again. **Build #3** finished with **SUCCESS**, and **`jenkins-ci-sample-app-1.0-SNAPSHOT.jar`** was saved as a build artifact.
+
+![Jenkins archived JAR artifact on Build #3](screenshots/49-jenkins-artifact-archive-build-3.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
