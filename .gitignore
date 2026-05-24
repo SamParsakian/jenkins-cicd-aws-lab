@@ -1,0 +1,131 @@
+# --- SSH keys and credentials (never publish) ---
+*.pem
+*.ppk
+*.key
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.p12
+*.pfx
+credentials.json
+secrets/
+*.secret
+*.credentials
+
+# --- Environment and config secrets ---
+.env
+.env.*
+!.env.example
+*.local
+config.local.*
+**/secrets/**
+
+# --- Jenkins ---
+jenkins_home/
+.jenkins/
+workspace/
+**/jobs/**/builds/
+**/jobs/**/workspace/
+*.hpl
+plugins/*.jpi
+plugins/*.hpi
+updates/
+userContent/
+*.log
+
+# --- Java / Maven / Gradle ---
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+out/
+bin/
+.gradle/
+.gradletasknamecache
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+hs_err_pid*
+replay_pid*
+
+# --- Node.js (if used in pipeline demos) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+.next/
+.nuxt/
+.cache/
+
+# --- Python (if used in pipeline demos) ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Docker ---
+.docker/
+docker-compose.override.yml
+
+# --- OS files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- IDE and editor ---
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+*~
+.fleet/
+
+# --- Temporary and backup files ---
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+*.orig
+
+# --- Archives (often contain keys or local exports) ---
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# --- AWS / cloud local config ---
+.aws/
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
