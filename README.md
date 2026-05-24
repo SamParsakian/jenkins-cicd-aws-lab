@@ -444,4 +444,101 @@ After the restart, the server and Jenkins were confirmed ready for a Java/Maven 
 
 ---
 
+## Phase 4 — Local Maven Sample App
+
+### Step 40 — The Tutorial Repository Was Cloned
+
+The official Jenkins tutorial repository was cloned into the local portfolio project folder:
+
+```bash
+cd jenkins-ci-sample-app
+```
+
+---
+
+### Step 41 — The App Folder Was Prepared
+
+The cloned folder was kept as **`jenkins-ci-sample-app`**. The existing `.git` folder inside it was removed so a new Git history could be created later.
+
+```bash
+rm -rf jenkins-ci-sample-app/.git
+```
+
+---
+
+### Step 42 — The Project Was Customized
+
+The sample app was updated for this portfolio project as a **DevOps Build Info App**.
+
+**`README.md`** was rewritten to describe the application and its build commands.
+
+**`pom.xml`** was updated:
+
+| Setting | Value |
+|---|---|
+| artifactId | `jenkins-ci-sample-app` |
+| name | `jenkins-ci-sample-app` |
+
+**`App.java`** and **`AppTest.java`** were updated to print and verify application name, status, environment, Java version, and build information.
+
+The local Java and Maven versions were verified before building:
+
+```bash
+java -version
+mvn -version
+```
+
+![Local Java and Maven versions](screenshots/42-local-java-maven-versions.png)
+
+---
+
+### Step 43 — The Unit Tests Were Run
+
+The project was tested locally with Maven:
+
+```bash
+cd jenkins-ci-sample-app
+mvn clean test
+```
+
+**Result:** 4 tests passed, 0 failures.
+
+![Maven clean test success](screenshots/43-maven-clean-test.png)
+
+---
+
+### Step 44 — The Application Was Packaged
+
+A JAR file was built with:
+
+```bash
+mvn clean package
+```
+
+**Result:** `BUILD SUCCESS`
+
+**Output file:**
+
+```
+target/jenkins-ci-sample-app-1.0-SNAPSHOT.jar
+```
+
+![Maven clean package success](screenshots/44-maven-clean-package.png)
+
+---
+
+### Step 45 — The Application Was Run Locally
+
+The packaged application was executed:
+
+```bash
+java -jar target/jenkins-ci-sample-app-1.0-SNAPSHOT.jar
+```
+
+The DevOps build information was printed to the console.
+
+![Application run locally](screenshots/45-app-run-local.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
