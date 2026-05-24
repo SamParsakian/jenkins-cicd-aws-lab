@@ -609,4 +609,28 @@ The job was run again. **Build #3** finished with **SUCCESS**, and **`jenkins-ci
 
 ---
 
+### Step 50 — A Root-Level Jenkinsfile Was Created
+
+The CI flow was stored as code in the sample app repository. A **`Jenkinsfile`** was added at the **root** of **`jenkins-ci-sample-app`** with a declarative pipeline:
+
+| Stage | Action |
+|---|---|
+| Checkout | `checkout scm` |
+| Build and Test | `mvn clean package` |
+| Archive Artifact | `target/*.jar` |
+
+The pipeline used **`agent any`**. SonarQube and Nexus were not included at this stage.
+
+![Root Jenkinsfile created in the project](screenshots/50-jenkinsfile-root-created.png)
+
+---
+
+### Step 51 — The Jenkinsfile Was Pushed to GitHub
+
+The updated repository was pushed to GitHub so Jenkins could use the root **`Jenkinsfile`** in a Pipeline job later. The file appeared in the repository next to the existing tutorial file under **`jenkins/`**.
+
+![Jenkinsfile visible in the GitHub repository](screenshots/51-jenkinsfile-on-github.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
