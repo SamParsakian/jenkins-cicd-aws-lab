@@ -693,4 +693,103 @@ Both **`ci-jenkins-controller`** and **`sonarqube-ci-server`** were **Running**.
 
 ---
 
+### Step 55 — SonarQube Scanner Plugin Was Installed
+
+The **SonarQube Scanner** plugin was installed on Jenkins from **Manage Jenkins → Plugins** (version **2.18.2**).
+
+![SonarQube Scanner plugin installed](screenshots/55-jenkins-sonarqube-plugin-installed.png)
+
+---
+
+### Step 56 — Jenkins SonarQube Credentials and Server Were Configured
+
+A **Secret text** credential was created for SonarQube:
+
+| Setting | Value |
+|---|---|
+| Kind | Secret text |
+| ID | `sonarqube-token` |
+| Description | SonarQube token for Jenkins pipeline analysis |
+
+![SonarQube token credential in Jenkins](screenshots/56-jenkins-sonarqube-token-credential.png)
+
+Under **Manage Jenkins → System**, a SonarQube server was added:
+
+| Setting | Value |
+|---|---|
+| Name | `SonarQube-Server` |
+| Server URL | `http://172.31.18.101:9000` |
+| Server authentication token | `sonarqube-token` |
+
+**Build #4** failed when the public IP was used. The server URL was changed to the SonarQube **private IP** so Jenkins could reach SonarQube inside the VPC.
+
+---
+
+### Step 57 — SonarQube Scanner Tool Was Configured
+
+Under **Manage Jenkins → Global Tool Configuration**, **SonarQube-Scanner** was added with **Install automatically** from Maven Central.
+
+![SonarQube Scanner tool configuration](screenshots/57-jenkins-sonarqube-scanner-tool.png)
+
+---
+
+### Step 58 — SonarQube Analysis Stage Was Added to the Jenkinsfile
+
+The root **`Jenkinsfile`** was updated with a **SonarQube Analysis** stage after **Build and Test**, using `withSonarQubeEnv('SonarQube-Server')` and `tool 'SonarQube-Scanner'` with project key **`jenkins-ci-sample-app`**.
+
+![Jenkinsfile SonarQube stage added](screenshots/58-jenkinsfile-sonarqube-stage.png)
+
+The change was pushed to GitHub and the **`pipeline-maven-sample-app`** job was run again.
+
+---
+
+### Step 59 — Pipeline Build #5 Passed the SonarQube Quality Gate
+
+A SonarQube project **`jenkins-ci-sample-app`** was created. **Pipeline Build #5** finished with **SUCCESS**, and the SonarQube **Quality Gate** showed **Passed**.
+
+![SonarQube quality gate passed](screenshots/59-sonarqube-quality-gate-passed.png)
+
+---
+
+## Phase 7 — Nexus Repository Server Setup
+
+### Step 60 — A Nexus EC2 Instance Was Launched
+
+A third EC2 instance was launched for **Nexus Repository Manager**:
+
+| Setting | Value |
+|---|---|
+| Instance name | `nexus-ci-server` |
+| AMI | Ubuntu Server 24.04 LTS |
+| Instance type | `t3.medium` |
+| Key pair | `ci-jenkins-key` |
+| Storage | 20 GiB |
+| Security group | `nexus-ci-sg` |
+
+**Inbound rules** for **`nexus-ci-sg`**:
+
+| Port | Protocol | Source | Purpose |
+|---|---|---|---|
+| 22 | SSH | My IP | Server access |
+| 8081 | Custom TCP | My IP | Nexus web UI |
+| 8081 | Custom TCP | Jenkins security group | Jenkins → Nexus |
+
+![Nexus EC2 launch configuration](screenshots/60-nexus-ec2-launch-config.png)
+
+---
+
+### Step 61 — The Nexus Instance Status Was Verified
+
+After launch, three CI servers were visible on the EC2 **Instances** page:
+
+| Instance | Status |
+|---|---|
+| `ci-jenkins-controller` | Running — 3/3 checks passed |
+| `sonarqube-ci-server` | Running — 3/3 checks passed |
+| `nexus-ci-server` | Running — **Initializing** |
+
+![Jenkins, SonarQube, and Nexus EC2 instances](screenshots/61-nexus-ec2-instances-running.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
