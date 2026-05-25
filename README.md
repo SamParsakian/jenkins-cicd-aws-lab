@@ -1,6 +1,122 @@
 # Jenkins CI/CD Project — Setup Report
 
-This report documents each step taken to provision an AWS EC2 instance and install Jenkins. All actions were performed manually from the AWS Console and a local terminal. This file will be updated as the project continues.
+This report documents how a full **CI/CD pipeline** was built for a Java Maven application. All actions were performed manually from the AWS Console, Jenkins, SonarQube, Nexus, and a local terminal.
+
+The sample application repository is on GitHub: [jenkins-ci-sample-app](https://github.com/SamParsakian/jenkins-ci-sample-app)
+
+---
+
+## Project goal
+
+The goal was to build a **portfolio-grade Jenkins CI/CD setup** that:
+
+- Runs on **AWS EC2**
+- Builds and tests a **Java Maven** application from **GitHub**
+- Runs **code quality checks** with **SonarQube**
+- Stores build artifacts in **Nexus Repository Manager**
+
+---
+
+## Architecture
+
+Three separate Ubuntu servers were used (same AWS region and VPC):
+
+```text
+GitHub (jenkins-ci-sample-app)
+        |
+        v
++---------------------+
+| Jenkins controller  |  port 8080
+| ci-jenkins-controller
++----------+----------+
+           |
+     +-----+-----+
+     |           |
+     v           v
++------------+ +------------+
+| SonarQube  | | Nexus OSS  |
+| port 9000  | | port 8081  |
++------------+ +------------+
+```
+
+| Server | Role | Port |
+|---|---|---|
+| `ci-jenkins-controller` | Jenkins, Freestyle job, Pipeline job | 8080 |
+| `sonarqube-ci-server` | SonarQube Community Edition | 9000 |
+| `nexus-ci-server` | Nexus Repository OSS | 8081 |
+
+Jenkins reaches SonarQube and Nexus using **private IPs inside the VPC**. The browser uses **public IPs** for the web UIs.
+
+---
+
+## Jenkins setup (summary)
+
+| Item | Value |
+|---|---|
+| Jenkins version | 2.555.2 (LTS) |
+| Global tools | `Maven-3.9`, `JDK-21`, `SonarQube-Scanner` |
+| Freestyle job | `build-maven-sample-app` |
+| Pipeline job | `pipeline-maven-sample-app` (root `Jenkinsfile`) |
+| SonarQube server name | `SonarQube-Server` |
+| Nexus credential ID | `nexus-admin-creds` |
+
+---
+
+## Freestyle job (summary)
+
+Job **`build-maven-sample-app`** pulls the GitHub repo, runs **`mvn clean package`** with **`Maven-3.9`** and **`JDK-21`**, and archives **`target/*.jar`**.
+
+---
+
+## Pipeline as Code (summary)
+
+Job **`pipeline-maven-sample-app`** uses the root **`Jenkinsfile`** with these stages:
+
+1. Checkout  
+2. Build and Test (`mvn clean package`)  
+3. SonarQube Analysis  
+4. Archive Artifact  
+5. Upload to Nexus (`mvn deploy:deploy-file`)
+
+---
+
+## SonarQube integration (summary)
+
+- SonarQube Scanner plugin installed in Jenkins  
+- Credential **`sonarqube-token`** (secret text)  
+- Project key **`jenkins-ci-sample-app`**  
+- First pipeline run with public SonarQube IP failed; **private IP** in Jenkins fixed the connection  
+- Quality Gate **Passed** on successful builds  
+
+---
+
+## Nexus artifact upload (summary)
+
+- Nexus OSS installed on **`nexus-ci-server`** (Java **11** required for this version)  
+- Repositories: **`jenkins-maven-releases`** (Release) and **`jenkins-maven-snapshots`** (Snapshot)  
+- Application version **`1.0-SNAPSHOT`** → uploads go to **`jenkins-maven-snapshots`**  
+- First upload used **`curl`** REST API → **HTTP 400** (snapshot repos need Maven client)  
+- Fix: **`mvn deploy:deploy-file`** with **`nexus-admin-creds`**  
+- **Build #11** succeeded; artifact path confirmed in Nexus  
+
+---
+
+## Final CI flow
+
+```text
+GitHub
+  -> Jenkins Pipeline (pipeline-maven-sample-app)
+  -> Maven build and test
+  -> SonarQube analysis (Quality Gate)
+  -> Jenkins archives JAR
+  -> Nexus upload (jenkins-maven-snapshots)
+```
+
+---
+
+## How to read this report
+
+The step-by-step sections below follow the work in order (**Steps 1–69**). Screenshots are stored in the [`screenshots/`](screenshots/) folder and linked from the steps where they exist.
 
 ---
 
@@ -792,4 +908,155 @@ After launch, three CI servers were visible on the EC2 **Instances** page:
 
 ---
 
-*This report will be extended as further CI/CD configuration steps are completed.*
+### Step 62 — Nexus Repository OSS Was Installed and Started
+
+**Nexus Repository OSS** was installed on **`nexus-ci-server`** and configured to listen on port **8081**:
+
+```
+http://16.16.182.61:8081
+```
+
+Nexus did not start correctly with **Java 17**. **Java 11** was installed, the startup file was backed up, and **`INSTALL4J_JAVA_HOME_OVERRIDE`** was set to `/usr/lib/jvm/java-11-openjdk-amd64`. After restart:
+
+| Check | Result |
+|---|---|
+| Service | `active (running)` |
+| Port 8081 | Listening |
+| HTTP | **200 OK** |
+
+---
+
+### Step 63 — Nexus First-Time Setup Was Completed
+
+The Nexus web UI was opened in a browser. Login was completed as **`admin`**, the admin password was changed, and **Disable anonymous access** was selected.
+
+Nexus was ready for repository creation.
+
+![Nexus welcome page](screenshots/62-nexus-welcome-page.png)
+
+---
+
+### Step 64 — A Maven Release Repository Was Created
+
+A **Maven 2 (hosted)** repository was created first with **Release** version policy:
+
+| Setting | Value |
+|---|---|
+| Name | `jenkins-maven-releases` |
+| Format | `maven2` |
+| Type | hosted |
+| Deployment policy | Allow redeploy |
+| Status | **Online** |
+
+![Nexus repository list with jenkins-maven-releases](screenshots/64-nexus-jenkins-maven-releases-repository.png)
+
+---
+
+### Step 65 — A Maven Snapshot Repository Was Created
+
+Because the application version is **`1.0-SNAPSHOT`**, a second hosted repository was created with **Snapshot** version policy:
+
+| Setting | Value |
+|---|---|
+| Name | `jenkins-maven-snapshots` |
+| Format | `maven2` |
+| Type | hosted |
+| Deployment policy | Allow redeploy |
+| Status | **Online** |
+
+---
+
+### Step 66 — Jenkins Nexus Credentials Were Added
+
+A Jenkins credential was created for Nexus uploads:
+
+| Setting | Value |
+|---|---|
+| Kind | Username with password |
+| ID | `nexus-admin-creds` |
+| Username | `admin` |
+
+---
+
+### Step 67 — The Jenkinsfile Upload Stage Was Fixed
+
+An **Upload to Nexus** stage was added to the root **`Jenkinsfile`** using the private Nexus URL:
+
+```
+http://172.31.27.93:8081
+```
+
+Repository: **`jenkins-maven-snapshots`**
+
+The first upload attempt used the Nexus **Components REST API** with **`curl`**. **Build #8–#10** failed with:
+
+```
+curl: (22) The requested URL returned error: 400
+```
+
+Nexus does not support REST upload to **Maven snapshot** repositories for **`1.0-SNAPSHOT`** artifacts. The stage was changed to **`mvn deploy:deploy-file`** with a temporary **`nexus-settings.xml`** and credential **`nexus-admin-creds`**.
+
+---
+
+### Step 68 — Pipeline Build #11 Succeeded
+
+After the corrected **`Jenkinsfile`** was pushed, **`pipeline-maven-sample-app` Build #11** finished with **SUCCESS**. The SonarQube **Quality Gate** showed **Passed**, and the JAR was archived in Jenkins.
+
+![Pipeline Build #11 success](screenshots/65-jenkins-pipeline-build-11-success.png)
+
+---
+
+### Step 69 — The JAR Artifact Was Confirmed in Nexus
+
+The uploaded artifact was confirmed in **`jenkins-maven-snapshots`**:
+
+```
+com/mycompany/app/jenkins-ci-sample-app/1.0-SNAPSHOT
+```
+
+The full CI flow was working: GitHub → Jenkins → Maven build/test → SonarQube → Jenkins archive → Nexus upload.
+
+![Nexus snapshot artifact uploaded](screenshots/66-nexus-snapshot-artifact-uploaded.png)
+
+---
+
+## Screenshot index
+
+Screenshots exist only for the steps listed below. No extra images were added.
+
+| Step | Screenshot file |
+|---|---|
+| 10 | `10-ec2-instance-running.png` |
+| 11 | `11-ec2-ssh-connect.png` |
+| 17 | `17-jenkins-official-docs.png` |
+| 26 | `26-jenkins-unlock.png` |
+| 27 | `27-jenkins-plugins-install.png` |
+| 28 | `28-jenkins-instance-config.png` |
+| 29 | `29-jenkins-dashboard.png` |
+| 42 | `42-local-java-maven-versions.png` |
+| 43 | `43-maven-clean-test.png` |
+| 44 | `44-maven-clean-package.png` |
+| 45 | `45-app-run-local.png` |
+| 46 | `46-jenkins-maven-global-tool-config.png` |
+| 48 | `48-jenkins-freestyle-build-success.png` |
+| 49 | `49-jenkins-artifact-archive-build-3.png` |
+| 50 | `50-jenkinsfile-root-created.png` |
+| 51 | `51-jenkinsfile-on-github.png` |
+| 52 | `52-jenkinsfile-pipeline-tools-github.png` |
+| 53 | `53-pipeline-build-2-success.png` |
+| 54 | `54-sonarqube-ec2-instances.png` |
+| 55 | `55-jenkins-sonarqube-plugin-installed.png` |
+| 56 | `56-jenkins-sonarqube-token-credential.png` |
+| 57 | `57-jenkins-sonarqube-scanner-tool.png` |
+| 58 | `58-jenkinsfile-sonarqube-stage.png` |
+| 59 | `59-sonarqube-quality-gate-passed.png` |
+| 60 | `60-nexus-ec2-launch-config.png` |
+| 61 | `61-nexus-ec2-instances-running.png` |
+| 62 | `62-nexus-welcome-page.png` |
+| 64 | `64-nexus-jenkins-maven-releases-repository.png` |
+| 65 | `65-jenkins-pipeline-build-11-success.png` |
+| 66 | `66-nexus-snapshot-artifact-uploaded.png` |
+
+---
+
+*End of setup report — Jenkins CI pipeline with Maven, SonarQube, and Nexus.*
