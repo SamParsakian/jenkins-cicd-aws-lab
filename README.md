@@ -664,4 +664,33 @@ The pipeline job was run again. **Build #2** finished with **SUCCESS**, and **`j
 
 ---
 
+## Phase 6 — SonarQube Server Setup
+
+### Step 54 — A SonarQube EC2 Instance Was Created
+
+A separate EC2 instance was created for SonarQube, following a dedicated-server setup:
+
+| Setting | Value |
+|---|---|
+| Instance name | `sonarqube-ci-server` |
+| AMI | Ubuntu Server 24.04 LTS |
+| Instance type | `t3.medium` |
+| Key pair | `ci-jenkins-key` |
+| Storage | 20 GiB |
+| Security group | `sonarqube-ci-sg` |
+
+**Inbound rules** for **`sonarqube-ci-sg`**:
+
+| Port | Protocol | Source | Purpose |
+|---|---|---|---|
+| 22 | SSH | My IP | Server access |
+| 9000 | Custom TCP | My IP | SonarQube web UI |
+| 9000 | Custom TCP | Jenkins security group | Jenkins → SonarQube |
+
+Both **`ci-jenkins-controller`** and **`sonarqube-ci-server`** were **Running**. Jenkins showed **2/2 checks passed**; SonarQube was still **Initializing**.
+
+![Jenkins and SonarQube EC2 instances](screenshots/54-sonarqube-ec2-instances.png)
+
+---
+
 *This report will be extended as further CI/CD configuration steps are completed.*
