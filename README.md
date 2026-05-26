@@ -70,23 +70,25 @@ Job **`build-maven-sample-app`** pulls the GitHub repo, runs **`mvn clean packag
 
 ## Pipeline as Code (summary)
 
-Job **`pipeline-maven-sample-app`** uses the root **`Jenkinsfile`** with these stages:
+Job **`pipeline-maven-sample-app`** uses the root **`Jenkinsfile`** from the sample app repository with these stages:
 
 1. Checkout  
 2. Build and Test (`mvn clean package`)  
-3. SonarQube Analysis  
-4. Archive Artifact  
-5. Upload to Nexus (`mvn deploy:deploy-file`)
+3. Run App Smoke Test (`java -jar` — app output in console log)  
+4. SonarQube Analysis (`sonar-scanner` with separate main/test sources and Java libraries)  
+5. Archive Artifact (`target/*.jar`)  
+6. Upload to Nexus (`mvn deploy:deploy-file`)
 
 ---
 
 ## SonarQube integration (summary)
 
 - SonarQube Scanner plugin installed in Jenkins  
-- Credential **`sonarqube-token`** (secret text)  
+- Credential ID **`sonarqube-token`** (token value stored only in Jenkins)  
 - Project key **`jenkins-ci-sample-app`**  
-- First pipeline run with public SonarQube IP failed; **private IP** in Jenkins fixed the connection  
-- Quality Gate **Passed** on successful builds  
+- Jenkins SonarQube server URL uses the **private VPC IP** (public IP failed from the controller)  
+- Scanner uses **`src/main/java`** and **`src/test/java`** as separate main/test sources  
+- Quality Gate **Passed** on successful builds when no new code issues are introduced  
 
 ---
 
@@ -104,9 +106,10 @@ Job **`pipeline-maven-sample-app`** uses the root **`Jenkinsfile`** with these s
 ## Final CI flow
 
 ```text
-GitHub
+GitHub (jenkins-ci-sample-app)
   -> Jenkins Pipeline (pipeline-maven-sample-app)
   -> Maven build and test
+  -> Smoke test (java -jar console output)
   -> SonarQube analysis (Quality Gate)
   -> Jenkins archives JAR
   -> Nexus upload (jenkins-maven-snapshots)
