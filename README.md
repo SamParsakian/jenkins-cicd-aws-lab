@@ -82,3 +82,11 @@ SonarQube was configured with project key **`jenkins-ci-sample-app`**. Snapshot 
 - Nexus snapshot upload was corrected by replacing REST `curl` with **`mvn deploy:deploy-file`**.
 
 Commands, console settings, and screenshots for each phase are documented in **[SETUP-REPORT.md](SETUP-REPORT.md)**.
+
+---
+
+## Project demo
+
+> Click the thumbnail to watch the full demo video on YouTube.
+>
+> [![Watch the Jenkins CI/CD project demo](https://img.youtube.com/vi/Fkg6QyKSsXk/hqdefault.jpg)](https://youtu.be/Fkg6QyKSsXk)
